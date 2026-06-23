@@ -7,7 +7,7 @@ spec:
   project: default
 
   source:
-    repoURL: https://github.com/Umair-Gillani/Drupal-Portal-Automation.git
+    repoURL: https://github.com/Umair-Gillani/Drupal-Portal-GitOps.git
     targetRevision: main
     path: k8s/overlays/prod
 
