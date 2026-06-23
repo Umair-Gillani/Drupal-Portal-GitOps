@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: drupal-uat
+
+resources:
+  - ../../base
+
+images:
+  - name: docker.io/umairgl123/drupalportal
+    newName: docker.io/umairgl123/drupalportal
+    newTag: v2
