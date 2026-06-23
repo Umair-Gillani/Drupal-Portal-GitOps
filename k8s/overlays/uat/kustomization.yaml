@@ -9,4 +9,4 @@ resources:
 images:
   - name: docker.io/umairgl123/drupalportal
     newName: docker.io/umairgl123/drupalportal
-    newTag: v8
+    newTag: v9
