@@ -37,16 +37,16 @@ spec:
               value: "gosi_pass123"
             - name: MYSQL_PORT
               value: "3306"
-          volumeMounts:
-            - name: vendor-volume
-              mountPath: /var/www/html/vendor
-              readOnly: false
-            - name: composer-json-volume
-              mountPath: /var/www/html/composer.json
-              readOnly: false
-            - name: composer-lock-volume
-              mountPath: /var/www/html/composer.lock
-              readOnly: false
+          # volumeMounts:
+          #   - name: vendor-volume
+          #     mountPath: /var/www/html/vendor
+          #     readOnly: false
+          #   - name: composer-json-volume
+          #     mountPath: /var/www/html/composer.json
+          #     readOnly: false
+          #   - name: composer-lock-volume
+          #     mountPath: /var/www/html/composer.lock
+          #     readOnly: false
 
       containers:
         - name: app
@@ -67,32 +67,32 @@ spec:
               value: "gosi_pass123"
             - name: MYSQL_PORT
               value: "3306"
-          volumeMounts:
-            - name: vendor-volume
-              mountPath: /var/www/html/vendor
-              readOnly: false
-            - name: composer-json-volume
-              mountPath: /var/www/html/composer.json
-              readOnly: false
-            - name: composer-lock-volume
-              mountPath: /var/www/html/composer.lock
-              readOnly: false
+          # volumeMounts:
+          #   - name: vendor-volume
+          #     mountPath: /var/www/html/vendor
+          #     readOnly: false
+          #   - name: composer-json-volume
+          #     mountPath: /var/www/html/composer.json
+          #     readOnly: false
+          #   - name: composer-lock-volume
+          #     mountPath: /var/www/html/composer.lock
+          #     readOnly: false
 
-      volumes:
-        - name: vendor-volume
-          hostPath:
-            path: /mnt/vendor
-            type: Directory
+      # volumes:
+      #   - name: vendor-volume
+      #     hostPath:
+      #       path: /mnt/vendor
+      #       type: Directory
 
-        - name: composer-json-volume
-          hostPath:
-            path: /mnt/composer.json
-            type: File
+      #   - name: composer-json-volume
+      #     hostPath:
+      #       path: /mnt/composer.json
+      #       type: File
 
-        - name: composer-lock-volume
-          hostPath:
-            path: /mnt/composer.lock
-            type: File
+      #   - name: composer-lock-volume
+      #     hostPath:
+      #       path: /mnt/composer.lock
+      #       type: File
 
 ---
 
