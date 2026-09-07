@@ -1,0 +1,124 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: standard-uat
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: gosi-postgresql-pv-uat
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard-uat
+  hostPath:
+    path: /mnt/data/gosi-postgresql-uat
+    type: DirectoryOrCreate
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gosi-postgresql-pvc
+spec:
+  volumeName: gosi-postgresql-pv-uat
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: standard-uat
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: gosi-postgresql
+spec:
+  type: ClusterIP
+  ports:
+    - name: postgresql
+      port: 5432
+      targetPort: 5432
+  selector:
+    app: gosi-postgresql
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gosi-postgresql-deployment
+  labels:
+    app: gosi-postgresql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gosi-postgresql
+  template:
+    metadata:
+      labels:
+        app: gosi-postgresql
+    spec:
+      containers:
+        - name: postgresql
+          image: postgres:16
+          imagePullPolicy: IfNotPresent
+
+          env:
+            - name: POSTGRES_DB
+              value: "gosi_drupal"
+
+            - name: POSTGRES_USER
+              value: "gosi_user"
+
+            - name: POSTGRES_PASSWORD
+              value: "gosi_pass123"
+
+            - name: PGDATA
+              value: "/var/lib/postgresql/data/pgdata"
+
+          ports:
+            - name: postgresql
+              containerPort: 5432
+
+          volumeMounts:
+            - name: postgresql-data
+              mountPath: /var/lib/postgresql/data
+
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U gosi_user -d gosi_drupal
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 6
+
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U gosi_user -d gosi_drupal
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+
+      volumes:
+        - name: postgresql-data
+          persistentVolumeClaim:
+            claimName: gosi-postgresql-pvc
