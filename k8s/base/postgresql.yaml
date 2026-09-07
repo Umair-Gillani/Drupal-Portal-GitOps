@@ -1,3 +1,5 @@
+# kubectl exec -i $POD -- psql -U gosi_user -d gosi_drupal < db.sql
+
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
