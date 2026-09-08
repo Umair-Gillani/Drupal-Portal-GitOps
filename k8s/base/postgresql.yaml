@@ -58,12 +58,12 @@ metadata:
   name: gosi-postgresql
 spec:
   type: ClusterIP
+  selector:
+    app: gosi-postgresql
   ports:
     - name: postgresql
       port: 5432
       targetPort: 5432
-  selector:
-    app: gosi-postgresql
 
 ---
 
@@ -89,7 +89,6 @@ spec:
     spec:
       containers:
         - name: postgresql
-
           image: postgres:17
           imagePullPolicy: IfNotPresent
 
@@ -135,6 +134,14 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 6
+
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"
 
       volumes:
         - name: postgresql-data
