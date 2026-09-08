@@ -1,3 +1,5 @@
+# change port according to your database (MySQL / Postgresql)
+# RIGHT NOW Postgresql PORT IS BEING USED IN THIS YAML FILE
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -36,7 +38,7 @@ spec:
             - name: MYSQL_PASSWORD
               value: "gosi_pass123"
             - name: MYSQL_PORT
-              value: "3306"
+              value: "5432"
           # volumeMounts:
           #   - name: vendor-volume
           #     mountPath: /var/www/html/vendor
@@ -66,7 +68,7 @@ spec:
             - name: MYSQL_PASSWORD
               value: "gosi_pass123"
             - name: MYSQL_PORT
-              value: "3306"
+              value: "5432"
           # volumeMounts:
           #   - name: vendor-volume
           #     mountPath: /var/www/html/vendor
