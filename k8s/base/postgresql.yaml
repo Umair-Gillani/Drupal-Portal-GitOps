@@ -1,3 +1,14 @@
+# docker run -d \
+  # --name gosi-postgresql \
+  # --restart unless-stopped \
+  # --network gosi-network \
+  # -e POSTGRES_DB=gosi_drupal \
+  # -e POSTGRES_USER=gosi_user \
+  # -e POSTGRES_PASSWORD=gosi_pass123 \
+  # -p 5432:5432 \
+  # -v gosi-postgresql-data:/var/lib/postgresql/data \
+  # postgres:17
+
 # kubectl exec -i $POD -- psql -U gosi_user -d gosi_drupal < db.sql
 
 apiVersion: storage.k8s.io/v1
@@ -12,7 +23,7 @@ volumeBindingMode: WaitForFirstConsumer
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: gosi-postgresql-pv-uat
+  name: gosi-postgresql17-pv-uat
 spec:
   capacity:
     storage: 5Gi
@@ -21,7 +32,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: standard-uat
   hostPath:
-    path: /mnt/data/gosi-postgresql-uat
+    path: /mnt/data/gosi-postgresql17-uat
     type: DirectoryOrCreate
 
 ---
@@ -29,9 +40,9 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: gosi-postgresql-pvc
+  name: gosi-postgresql17-pvc
 spec:
-  volumeName: gosi-postgresql-pv-uat
+  volumeName: gosi-postgresql17-pv-uat
   accessModes:
     - ReadWriteOnce
   resources:
@@ -62,19 +73,24 @@ metadata:
   name: gosi-postgresql-deployment
   labels:
     app: gosi-postgresql
+
 spec:
   replicas: 1
+
   selector:
     matchLabels:
       app: gosi-postgresql
+
   template:
     metadata:
       labels:
         app: gosi-postgresql
+
     spec:
       containers:
         - name: postgresql
-          image: postgres:16
+
+          image: postgres:17
           imagePullPolicy: IfNotPresent
 
           env:
@@ -123,4 +139,4 @@ spec:
       volumes:
         - name: postgresql-data
           persistentVolumeClaim:
-            claimName: gosi-postgresql-pvc
+            claimName: gosi-postgresql17-pvc
