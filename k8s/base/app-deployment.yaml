@@ -1,5 +1,19 @@
 # change port according to your database (MySQL / Postgresql)
-# RIGHT NOW Postgresql PORT IS BEING USED IN THIS YAML FILE
+# # RIGHT NOW Postgresql PORT IS BEING USED IN THIS YAML FILE
+
+# docker run -d \
+#   --name my-app \
+#   --restart unless-stopped \
+#   --network gosi-network \
+#   -p 30081:80 \
+#   -e MYSQL_DATABASE=gosi_drupal \
+#   -e MYSQL_HOST=gosi-postgresql \
+#   -e MYSQL_USER=gosi_user \
+#   -e MYSQL_PASSWORD=gosi_pass123 \
+#   -e MYSQL_PORT=5432 \
+#   umairgl123/drupalportal:latest
+
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
