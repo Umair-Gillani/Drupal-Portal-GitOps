@@ -9,7 +9,7 @@
   # -v gosi-postgresql-data:/var/lib/postgresql/data \
   # postgres:17
 
-# kubectl exec -i $POD -- psql -U gosi_user -d gosi_drupal < db.sql
+# kubectl exec -i gosi-postgresql-deployment-6f57b597b9-mmjjz -- psql -U gosi_user -d gosi_drupal < db.sql
 
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
