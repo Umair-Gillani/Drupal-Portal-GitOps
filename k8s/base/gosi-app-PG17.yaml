@@ -1,0 +1,242 @@
+
+syedumair_aligillani@cloudshell:~ (abacus-apigee-hybrid-demo)$ more app.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app-deployment
+  labels:
+    app: my-app
+
+spec:
+  replicas: 1
+  revisionHistoryLimit: 4
+
+  selector:
+    matchLabels:
+      app: my-app
+
+  template:
+    metadata:
+      labels:
+        app: my-app
+
+    spec:
+
+      initContainers:
+       - name: drush-cache-rebuild
+         image: umairgl123/drupalportal:gosi_with_PG17
+         imagePullPolicy: Always
+      
+         command:
+           - /bin/bash
+           - -c
+           - |
+             php /var/www/html/vendor/bin/drush.php cr
+      
+         env:
+           - name: PGSQL_DATABASE
+             value: "gosi_drupal"
+      
+           - name: PGSQL_HOST
+             value: "gosi-postgresql"
+      
+           - name: PGSQL_USER
+             value: "gosi_user"
+      
+           - name: PGSQL_PASSWORD
+             value: "gosi_pass123"
+      
+           - name: PGSQL_PORT
+             value: "5432"
+
+
+      containers:
+        - name: app
+          image: umairgl123/drupalportal:gosi_with_PG17
+          imagePullPolicy: Always
+
+          ports:
+            - containerPort: 80
+
+          env:
+            - name: PGSQL_DATABASE
+              value: "gosi_drupal"
+
+            - name: PGSQL_HOST
+              value: "gosi-postgresql"
+
+            - name: PGSQL_USER
+              value: "gosi_user"
+
+            - name: PGSQL_PASSWORD
+              value: "gosi_pass123"
+
+            - name: PGSQL_PORT
+              value: "5432"
+
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+syedumair_aligillani@cloudshell:~ (abacus-apigee-hybrid-demo)$ 
+syedumair_aligillani@cloudshell:~ (abacus-apigee-hybrid-demo)$ 
+syedumair_aligillani@cloudshell:~ (abacus-apigee-hybrid-demo)$ 
+syedumair_aligillani@cloudshell:~ (abacus-apigee-hybrid-demo)$ more app-service.yaml 
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-app-service
+
+spec:
+  type: LoadBalancer
+
+  selector:
+    app: my-app
+
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+syedumair_aligillani@cloudshell:~ (abacus-apigee-hybrid-demo)$ more postgresql.yaml 
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: standard-uat
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: gosi-postgresql17-pv-uat
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard-uat
+  hostPath:
+    path: /mnt/data/gosi-postgresql17-uat
+    type: DirectoryOrCreate
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gosi-postgresql17-pvc
+spec:
+  volumeName: gosi-postgresql17-pv-uat
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: standard-uat
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: gosi-postgresql
+spec:
+  type: ClusterIP
+  selector:
+    app: gosi-postgresql
+  ports:
+    - name: postgresql
+      port: 5432
+      targetPort: 5432
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gosi-postgresql-deployment
+  labels:
+    app: gosi-postgresql
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: gosi-postgresql
+
+  template:
+    metadata:
+      labels:
+        app: gosi-postgresql
+
+    spec:
+      containers:
+        - name: postgresql
+          image: postgres:17
+          imagePullPolicy: IfNotPresent
+
+          env:
+            - name: POSTGRES_DB
+              value: "gosi_drupal"
+
+            - name: POSTGRES_USER
+              value: "gosi_user"
+
+            - name: POSTGRES_PASSWORD
+              value: "gosi_pass123"
+
+            - name: PGDATA
+              value: "/var/lib/postgresql/data/pgdata"
+
+          ports:
+            - name: postgresql
+              containerPort: 5432
+
+          volumeMounts:
+            - name: postgresql-data
+              mountPath: /var/lib/postgresql/data
+
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U gosi_user -d gosi_drupal
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 6
+
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U gosi_user -d gosi_drupal
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+
+      volumes:
+        - name: postgresql-data
+          persistentVolumeClaim:
+            claimName: gosi-postgresql17-pvc
+syedumair_aligillani@cloudshell:~ (abacus-apigee-hybrid-demo)$ 
