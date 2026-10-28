@@ -239,4 +239,4 @@ spec:
         - name: postgresql-data
           persistentVolumeClaim:
             claimName: gosi-postgresql17-pvc
-syedumair_aligillani@cloudshell:~ (abacus-apigee-hybrid-demo)$ 
+syedumair_aligillani@cloudshell:~ (abacus-apigee-hybrid-demo)$ .
